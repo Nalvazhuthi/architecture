@@ -1,0 +1,109 @@
+/* Base styling */
+.properties-panel {
+  position: fixed;
+  /* Fix the panel to the right */
+  top: 0;
+  right: 0;
+  width: 320px;
+  /* Set the width of the panel */
+  background-color: var(--primary-color);
+  border-radius: 12px 0 0 12px;
+  /* Rounded corners on the left side */
+  box-shadow: var(--box-shadow-medium);
+  /* Add a shadow for depth */
+  padding: 20px;
+  z-index: 999;
+  /* Make sure the panel stays on top */
+  overflow-y: auto;
+
+  /* Allow scrolling if the content overflows */
+  .close {
+    position: absolute;
+  }
+
+  /* Styling for the header */
+  h2 {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 10px;
+  }
+
+  /* Styling for each input field */
+  .property {
+    margin-bottom: 8px;
+
+    label {
+      display: block;
+      font-size: 1rem;
+      color: var(--text-color);
+      margin-bottom: 8px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--text-disabled);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+  }
+
+  /* Metadata section styling */
+  .metadata {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: var(--text-color);
+
+    h3 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+    }
+
+    .metadata-item {
+      margin-bottom: 8px;
+    }
+  }
+}
+
+/* Adding a smooth transition effect for the panel */
+.properties-panel {
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Optional: Adding a "close" button for the panel */
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 4px 6px;
+  font-size: 10px;
+  background-color: var(--text-color);
+  color: var(--primary-color);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #ff1c1c;
+  }
+}
+
+.open-btn {
+  position: fixed;
+  top: 20px;
+  right: 0;
+  transform: translate(0%, -0%);
+  background-color: var(--accent-color);
+  color: var(--primary-color);
+  border: none;
+  border-radius: 8px 0 0 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  z-index: 998;
+  box-shadow: var(--box-shadow-medium);
+  transition: background-color 0.3s;
+
+  
+}
