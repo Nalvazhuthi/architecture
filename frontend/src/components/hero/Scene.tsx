@@ -2,12 +2,10 @@ import React, { useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { CameraControls, OrbitControls } from "@react-three/drei";
 import DrawLayout from "./DrawLayout";
-import RaycasterPlane from "./RaycasterPlane";
 import CameraView from "./CameraView";
 import { useToolStore } from "../../store/store";
 
 const Scene = () => {
-  const controls = useRef();
   const { is3d } = useToolStore();
   return (
     <div className="canvas" style={{ height: "100vh", background: '#fafafa' }}>
@@ -22,7 +20,7 @@ const Scene = () => {
           enablePan={true}
           enableZoom={true}
           minZoom={10}
-          maxZoom={50}
+          maxZoom={100}
         />
         {/* Grid */}
         <gridHelper
