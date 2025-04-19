@@ -21,19 +21,25 @@ $text-color: #2b3344; // Primary text color
 $text-disabled: #b7b7c6; // Disabled text color
 $input-text-color: #595965; // Input field text color
 
+$primary-color: #95d4e8;
+$secondary-color: #070f18;
+
+$secondary-color-dark: #95d4e8;
+$primary-color-dark: #070f18;
+
 $text-color-dark: #f3f3fd; // Primary text color for dark mode
 $text-disabled-dark: #6f6f7a; // Disabled text color for dark mode
 $input-text-color-dark: #b5b5c8; // Input field text color for dark mode
 
 // Accent colors
-$accent-color: #6f42c1; // Primary accent color
+$accent-color: #305cde; // Primary accent color
 $accent-color-dark: #c4abf1; // Primary accent color for dark mode
 $highlight-accent-color: #e0dfff; // Highlighted accent for light mode
 $highlight-accent-color-dark: #403e6a; // Highlighted accent for dark mode
 
 // Background colors
 $background-color: #fcfdfd; // Main background color
-$background-color-dark: #19191d; // Main background color for dark mode
+$background-color-dark: #070f18; // Main background color for dark mode
 $background-color-secondary: #e1e0ff80; // Secondary background color
 $background-color-secondary-dark: #39394f99; // Secondary background color for dark mode
 $background-color-gray: #f3f3f3; // Main background color
@@ -83,7 +89,12 @@ $acent-gradient: linear-gradient(
 ); // Light mode accent gradient
 
 $faint-gradient: radial-gradient(circle, #bfe0f8 0%, #e9ebff 46%, #e2acff 100%);
-$faint-gradient-dark: radial-gradient(circle, #31373b 0%, #48494b 46%, #52415c 100%);
+$faint-gradient-dark: radial-gradient(
+  circle,
+  #31373b 0%,
+  #48494b 46%,
+  #52415c 100%
+);
 
 // ========================================================================
 // Typography

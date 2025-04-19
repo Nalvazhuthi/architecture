@@ -8,8 +8,9 @@
   --input-text-color: #{$input-text-color}; // Input field text color
 
   // Accent and Highlight colors
-  --primary-color: #{$background-color}; // Primary color for light theme
-  --accent-color: #{$accent-color}; // Primary accent color for light theme
+  --primary-color: #{$primary-color}; // Primary color for light theme
+  --secondary-color: #{$secondary-color}; // Primary accent color for light theme
+
   --highlight-accent-color: #{$highlight-accent-color}; // Highlight color for light theme
   --accent-gradient-color: #{$acent-gradient}; // Primary accent color for light theme
   --faint-gradient-color: #{$faint-gradient};
@@ -47,8 +48,9 @@
   --input-text-color: #{$input-text-color-dark}; // Input field text color
 
   // Accent and Highlight colors
-  --primary-color: #{$highlight-accent-color-dark};
-  --accent-color: #{$accent-color-dark}; // Primary accent color for dark theme
+  --primary-color: #{$primary-color-dark};
+  --secondary-color: #{$secondary-color-dark}; // Primary accent color for dark theme
+
   --highlight-accent-color: #{$highlight-accent-color-dark}; // Highlight color for dark theme
   --accent-gradient-color: #{$acent-gradient-dark}; // Primary accent color for light theme
   --faint-gradient-color: #{$faint-gradient-dark};

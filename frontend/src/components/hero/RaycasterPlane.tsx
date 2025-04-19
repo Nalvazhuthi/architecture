@@ -22,12 +22,7 @@ const RaycasterPlane: React.FC<RaycasterPlaneProps> = ({
       onPointerMove={handlePointerMove}
     >
       <planeGeometry args={[1000, 1000]} />
-      <meshBasicMaterial
-        color="white"
-        transparent
-        opacity={0.5}
-        depthWrite={false}
-      />
+      <meshBasicMaterial transparent opacity={0} />
     </mesh>
   );
 };

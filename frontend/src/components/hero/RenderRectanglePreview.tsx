@@ -10,9 +10,7 @@ type RectanglePreviewProps = {
 const RectanglePreview: React.FC<RectanglePreviewProps> = ({
   startPoint,
   endPoint,
-  drawingMode,
 }) => {
-  console.log("drawingMode");
   const positions = new Float32Array([
     startPoint.x,
     0,
@@ -39,7 +37,7 @@ const RectanglePreview: React.FC<RectanglePreviewProps> = ({
           position: new THREE.BufferAttribute(positions, 3),
         }}
       />
-      <lineBasicMaterial linewidth={2} color="black" />
+      <lineBasicMaterial linewidth={2} color="red" />
     </line>
   );
 };

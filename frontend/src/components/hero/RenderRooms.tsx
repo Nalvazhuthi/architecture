@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import * as THREE from "three";
-import { Html } from "@react-three/drei";
+import { Html, useTexture } from "@react-three/drei";
 import { generateWallsFromRooms } from "../../functions/generateWallsForRoom";
+
 interface Room {
   name: string;
-  area: number; // Ensure area is correctly populated
+  area: number;
   points: THREE.Vector3[];
 }
 
@@ -14,6 +15,23 @@ interface RenderRoomsProps {
 
 const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
   const [walls, setWalls] = useState<any[]>([]);
+  // Texture loader with performance considerations
+  const wallTextures = useTexture({
+    map: "/textures/wall/brick_wall_09_diff_1k.jpg", // Albedo
+    normalMap: "/textures/wall/brick_wall_09_nor_gl_1k.jpg", // Normal GL
+    aoMap: "/textures/wall/brick_wall_09_arm_1k.jpg", // Ambient Occlusion (R channel)
+    roughnessMap: "/textures/wall/brick_wall_09_arm_1k.jpg", // G channel
+    metalnessMap: "/textures/wall/brick_wall_09_arm_1k.jpg", // B channel
+  });
+
+  const floorTextures = useTexture({
+    map: "/textures/floor/stone_pavers_diff_1k.jpg", // Diffuse/albedo map
+    normalMap: "/textures/floor/stone_pavers_nor_gl_1k.jpg", // GL version (for WebGL)
+    aoMap: "/textures/floor/stone_pavers_arm_1k.jpg", // Combined AO/Rough/Metal (used for AO here)
+    roughnessMap: "/textures/floor/stone_pavers_arm_1k.jpg", // Same texture reused
+    metalnessMap: "/textures/floor/stone_pavers_arm_1k.jpg", // Same texture reused
+  });
+
   useEffect(() => {
     const roomWalls = generateWallsFromRooms(rooms);
     setWalls([...roomWalls]);
@@ -35,11 +53,12 @@ const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
   const calculateRoomBounds = (points: THREE.Vector3[]) => {
     const xs = points.map((p) => p.x);
     const zs = points.map((p) => p.z);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minZ = Math.min(...zs);
-    const maxZ = Math.max(...zs);
-    return { minX, maxX, minZ, maxZ };
+    return {
+      minX: Math.min(...xs),
+      maxX: Math.max(...xs),
+      minZ: Math.min(...zs),
+      maxZ: Math.max(...zs),
+    };
   };
 
   const calculateRoomCenter = (points: THREE.Vector3[]) => {
@@ -61,12 +80,50 @@ const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
     const adjustedZ = center.z + (bounds.maxZ - bounds.minZ) * 0.5 * offsetZ;
     return { x: adjustedX, z: adjustedZ };
   };
+  const addUVsToShapeGeometry = (geometry: THREE.ShapeGeometry) => {
+    geometry.computeBoundingBox();
+
+    const { min, max } = geometry.boundingBox!;
+    const size = new THREE.Vector2(max.x - min.x, max.y - min.y);
+
+    const uvAttribute = new Float32Array(
+      geometry.attributes.position.count * 2
+    );
+
+    for (let i = 0; i < geometry.attributes.position.count; i++) {
+      const x = geometry.attributes.position.getX(i);
+      const y = geometry.attributes.position.getY(i);
+
+      const u = (x - min.x) / size.x;
+      const v = (y - min.y) / size.y;
+
+      uvAttribute[i * 2] = u;
+      uvAttribute[i * 2 + 1] = v;
+    }
+
+    geometry.setAttribute("uv", new THREE.BufferAttribute(uvAttribute, 2));
+  };
+  useEffect(() => {
+    Object.values(floorTextures).forEach((tex) => {
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6, 6); // Increase these to repeat the texture more
+      tex.needsUpdate = true;
+    });
+    Object.values(wallTextures).forEach((tex) => {
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(0.5, 0.5); // Increase these to repeat the texture more
+      tex.needsUpdate = true;
+    });
+  }, [floorTextures]);
 
   return (
     <>
+      {/* Render Rooms */}
       {rooms.map((room, index) => {
         const shape = createShapeFromPoints(room.points);
         const geometry = new THREE.ShapeGeometry(shape);
+        addUVsToShapeGeometry(geometry); // <-- Add this line
+
         const bounds = calculateRoomBounds(room.points);
         const center = calculateRoomCenter(room.points);
         const adjustedPos = adjustLabelPosition([0, 0], bounds, center);
@@ -78,8 +135,12 @@ const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
               rotation={[Math.PI * 0.5, 0, 0]}
               position={[0, 0.01, 0]}
             >
-              <meshBasicMaterial
-                color="#ccccc"
+              <meshStandardMaterial
+                map={floorTextures.map}
+                normalMap={floorTextures.normalMap}
+                aoMap={floorTextures.aoMap}
+                roughnessMap={floorTextures.roughnessMap}
+                metalnessMap={floorTextures.metalnessMap}
                 side={THREE.BackSide}
                 transparent
                 opacity={1}
@@ -95,25 +156,48 @@ const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
         );
       })}
 
-      {/* Render Walls */}
+      {/* Render Extruded Walls */}
       {walls.map((wall, index) => {
         const { start, end } = wall;
+        const wallThickness = 0.2; // Increased thickness for better visibility
+        const wallHeight = 2; // Standard wall height (2.5 meters)
+
+        const direction = new THREE.Vector3().subVectors(end, start);
+        const length = direction.length();
+        direction.normalize();
+
+        // Create a wall geometry with proper thickness and height
+        const wallGeometry = new THREE.BoxGeometry(
+          length + 0.2, // length of the wall
+          wallHeight, // height of the wall
+          wallThickness // thickness of the wall
+        );
+
+        // Calculate the center position
+        const center = new THREE.Vector3()
+          .addVectors(start, end)
+          .multiplyScalar(0.5);
+
+        // Calculate the rotation angle
+        const angle = Math.atan2(end.z - start.z, end.x - start.x);
+
         return (
-          <group key={`2d-wall-${index}`} position={[0, 0.015, 0]}>
-            <line>
-              <bufferGeometry>
-                <bufferAttribute
-                  attach="attributes-position"
-                  count={2}
-                  array={
-                    new Float32Array([start.x, 0, start.z, end.x, 0, end.z])
-                  }
-                  itemSize={3}
-                />
-              </bufferGeometry>
-              <lineBasicMaterial linewidth={2} color="black" />
-            </line>
-          </group>
+          <mesh
+            key={`wall-${index}`}
+            geometry={wallGeometry}
+            position={[center.x, wallHeight / 2, center.z]} // Position at half height
+            rotation={[0, -angle, 0]}
+          >
+            <meshStandardMaterial
+              map={wallTextures.map}
+              normalMap={wallTextures.normalMap}
+              aoMap={wallTextures.aoMap}
+              roughnessMap={wallTextures.roughnessMap}
+              metalnessMap={wallTextures.metalnessMap}
+              metalness={1}
+              roughness={1}
+            />
+          </mesh>
         );
       })}
     </>
@@ -121,3 +205,5 @@ const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
 };
 
 export default RenderRooms;
+
+// load there

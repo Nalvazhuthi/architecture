@@ -18,3 +18,9 @@ export const useToolStore = create<ToolState>((set) => ({
   setIs3d: (is3d) => set({ is3d }), // Set is3d to either true or false
   setGridSnap: (gridSnap) => set({ gridSnap }), // Set is3d to either true or false
 }));
+
+
+
+
+
+
