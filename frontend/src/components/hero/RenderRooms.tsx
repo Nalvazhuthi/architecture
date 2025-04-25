@@ -15,22 +15,7 @@ interface RenderRoomsProps {
 
 const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
   const [walls, setWalls] = useState<any[]>([]);
-  // Texture loader with performance considerations
-  const wallTextures = useTexture({
-    map: "/textures/wall/brick_wall_09_diff_1k.jpg", // Albedo
-    normalMap: "/textures/wall/brick_wall_09_nor_gl_1k.jpg", // Normal GL
-    aoMap: "/textures/wall/brick_wall_09_arm_1k.jpg", // Ambient Occlusion (R channel)
-    roughnessMap: "/textures/wall/brick_wall_09_arm_1k.jpg", // G channel
-    metalnessMap: "/textures/wall/brick_wall_09_arm_1k.jpg", // B channel
-  });
-
-  const floorTextures = useTexture({
-    map: "/textures/floor/stone_pavers_diff_1k.jpg", // Diffuse/albedo map
-    normalMap: "/textures/floor/stone_pavers_nor_gl_1k.jpg", // GL version (for WebGL)
-    aoMap: "/textures/floor/stone_pavers_arm_1k.jpg", // Combined AO/Rough/Metal (used for AO here)
-    roughnessMap: "/textures/floor/stone_pavers_arm_1k.jpg", // Same texture reused
-    metalnessMap: "/textures/floor/stone_pavers_arm_1k.jpg", // Same texture reused
-  });
+  const [selectedRoom, setSelectedRoom] = useState("");
 
   useEffect(() => {
     const roomWalls = generateWallsFromRooms(rooms);
@@ -80,41 +65,6 @@ const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
     const adjustedZ = center.z + (bounds.maxZ - bounds.minZ) * 0.5 * offsetZ;
     return { x: adjustedX, z: adjustedZ };
   };
-  const addUVsToShapeGeometry = (geometry: THREE.ShapeGeometry) => {
-    geometry.computeBoundingBox();
-
-    const { min, max } = geometry.boundingBox!;
-    const size = new THREE.Vector2(max.x - min.x, max.y - min.y);
-
-    const uvAttribute = new Float32Array(
-      geometry.attributes.position.count * 2
-    );
-
-    for (let i = 0; i < geometry.attributes.position.count; i++) {
-      const x = geometry.attributes.position.getX(i);
-      const y = geometry.attributes.position.getY(i);
-
-      const u = (x - min.x) / size.x;
-      const v = (y - min.y) / size.y;
-
-      uvAttribute[i * 2] = u;
-      uvAttribute[i * 2 + 1] = v;
-    }
-
-    geometry.setAttribute("uv", new THREE.BufferAttribute(uvAttribute, 2));
-  };
-  useEffect(() => {
-    Object.values(floorTextures).forEach((tex) => {
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(6, 6); // Increase these to repeat the texture more
-      tex.needsUpdate = true;
-    });
-    Object.values(wallTextures).forEach((tex) => {
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(0.5, 0.5); // Increase these to repeat the texture more
-      tex.needsUpdate = true;
-    });
-  }, [floorTextures]);
 
   return (
     <>
@@ -122,7 +72,6 @@ const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
       {rooms.map((room, index) => {
         const shape = createShapeFromPoints(room.points);
         const geometry = new THREE.ShapeGeometry(shape);
-        addUVsToShapeGeometry(geometry); // <-- Add this line
 
         const bounds = calculateRoomBounds(room.points);
         const center = calculateRoomCenter(room.points);
@@ -136,17 +85,15 @@ const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
               position={[0, 0.01, 0]}
             >
               <meshStandardMaterial
-                map={floorTextures.map}
-                normalMap={floorTextures.normalMap}
-                aoMap={floorTextures.aoMap}
-                roughnessMap={floorTextures.roughnessMap}
-                metalnessMap={floorTextures.metalnessMap}
                 side={THREE.BackSide}
                 transparent
                 opacity={1}
               />
             </mesh>
-            <Html position={[adjustedPos.x, 0.02, adjustedPos.z]}>
+            <Html
+              position={[adjustedPos.x, 0.02, adjustedPos.z]}
+              zIndexRange={[1, 0]}
+            >
               <div className="room-label">
                 <div className="label">{room.name}</div>
                 <div className="label area">Dimension : 10 * 14</div>
@@ -188,15 +135,7 @@ const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
             position={[center.x, wallHeight / 2, center.z]} // Position at half height
             rotation={[0, -angle, 0]}
           >
-            <meshStandardMaterial
-              map={wallTextures.map}
-              normalMap={wallTextures.normalMap}
-              aoMap={wallTextures.aoMap}
-              roughnessMap={wallTextures.roughnessMap}
-              metalnessMap={wallTextures.metalnessMap}
-              metalness={1}
-              roughness={1}
-            />
+            <meshStandardMaterial metalness={1} roughness={1} />
           </mesh>
         );
       })}
@@ -205,5 +144,3 @@ const RenderRooms: React.FC<RenderRoomsProps> = ({ rooms }) => {
 };
 
 export default RenderRooms;
-
-// load there

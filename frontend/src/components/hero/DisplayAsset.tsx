@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAssetControl } from "../../store/assetControls";
 import { useThree } from "@react-three/fiber";
 import { getIntersectionPoint } from "../../functions/getIntersectionPoint";
@@ -22,9 +22,25 @@ const DisplayAsset = () => {
   const isDragging = useRef(false);
   const meshRefs = useRef<Record<number, THREE.Mesh>>({});
 
+  const [placeHolderPosition, setPlaceHolderPosition] =
+    useState<THREE.Vector3 | null>(null);
+
   // Handle drag-and-drop from UI to canvas
   useEffect(() => {
-    const handleDragOver = (e: DragEvent) => e.preventDefault();
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+
+      const point = getIntersectionPoint(
+        { clientX: e.clientX, clientY: e.clientY },
+        camera,
+        scene,
+        size
+      );
+      if (point) {
+        const snapped = snapToGrid(point);
+        setPlaceHolderPosition(snapped);
+      }
+    };
 
     const handleDrop = (e: DragEvent) => {
       e.preventDefault();
@@ -38,12 +54,14 @@ const DisplayAsset = () => {
       );
 
       if (worldPosition) {
+        const snapped = snapToGrid(worldPosition);
         addAsset(draggedAsset, {
-          x: worldPosition.x,
+          x: snapped.x,
           y: 0,
-          z: worldPosition.z,
+          z: snapped.z,
         });
         setDraggedAsset(null);
+        setPlaceHolderPosition(null);
       }
     };
 
@@ -111,20 +129,18 @@ const DisplayAsset = () => {
 
   return (
     <group>
-      {/* Transparent floor plane to catch outer clicks */}
-      <mesh
-        position={[0, -0.51, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        scale={[1000, 1000, 1]}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          setSelectedAsset(null);
-        }}
-      >
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial transparent opacity={0} />
-      </mesh>
+      {/* PlaceHolder Preview */}
+      {draggedAsset && placeHolderPosition && (
+        <mesh
+          position={[placeHolderPosition.x, 0.01, placeHolderPosition.z]}
+          rotation={[-Math.PI / 2, 0, 0]} // Face up
+        >
+          <circleGeometry args={[0.5, 32]} />
+          <meshBasicMaterial color="gray" transparent opacity={0.5} />
+        </mesh>
+      )}
 
+      {/* Placed Assets */}
       {assets.map((asset) => (
         <mesh
           key={asset.id}

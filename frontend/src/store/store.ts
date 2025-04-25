@@ -11,7 +11,7 @@ interface ToolState {
 }
 
 export const useToolStore = create<ToolState>((set) => ({
-  activeTool: 'RectangularWall', // Default tool
+  activeTool: 'PolygonWall', // Default tool
   is3d: false, // Default is 2D (false)
   gridSnap: true, // Default is 2D (false)
   setActiveTool: (tool) => set({ activeTool: tool }),

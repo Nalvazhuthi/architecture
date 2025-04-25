@@ -6,6 +6,7 @@ interface RaycasterPlaneProps {
   handlePointerDown: any;
   handlePointerUp: any;
   handlePointerMove: any;
+  
 }
 
 const RaycasterPlane: React.FC<RaycasterPlaneProps> = ({
