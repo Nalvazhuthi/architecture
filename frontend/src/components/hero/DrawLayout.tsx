@@ -55,8 +55,12 @@ type Action =
     }
   | { type: "UNDO"; originalAction: Action };
 
-const DrawLayout: React.FC = () => {
-  const [rooms, setRooms] = useState<Room[]>([]);
+interface DrawLayoutProps {
+  rooms: Room[];
+  setRooms: React.Dispatch<React.SetStateAction<Room[]>>;
+}
+
+const DrawLayout: React.FC<DrawLayoutProps> = ({ rooms, setRooms }) => {
   const { scene, camera, size } = useThree();
 
   // Drawing states
@@ -103,12 +107,10 @@ const DrawLayout: React.FC = () => {
   ) => {
     return (
       (edge1.start.distanceTo(edge2.start) < tolerance &&
-      edge1.end.distanceTo(edge2.end) < tolerance
-    ) ||
+        edge1.end.distanceTo(edge2.end) < tolerance) ||
       (edge1.start.distanceTo(edge2.end) < tolerance &&
-      edge1.end.distanceTo(edge2.start) < tolerance
-    )
-  )
+        edge1.end.distanceTo(edge2.start) < tolerance)
+    );
   };
 
   // Find shared edges between rooms
@@ -699,7 +701,6 @@ const DrawLayout: React.FC = () => {
       </>
     );
   };
-
 
   return (
     <>
